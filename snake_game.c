@@ -6,11 +6,11 @@
 
 #define  HEIGHT         30 //Y coordinate
 #define  WIDTH          60 //X coordinate
-#define  MAX_SNAKE_BODY 50
+#define  MAX_SNAKE_BODY 119
 #define  OCCUPIED       1
 #define  FREE           0
 
-#define WIN_PAIR      1
+//#define WIN_PAIR      1
 
 typedef struct snake
 {
@@ -97,8 +97,11 @@ e_result move_snake(WINDOW *my_win, s_snake *snake, int arrow_key, int max_y, in
             {
                status = game_over;
                // Prints GAME OVER in window
+               init_pair(2, COLOR_RED, COLOR_BLACK);
+               wattron(my_win, COLOR_PAIR(2));
                int size = strlen("GAME OVER...");
                mvwprintw(my_win, max_y/2, (max_x-size)/2, "GAME OVER..."); //
+               //wattroff(my_win, COLOR_PAIR(2));
                wrefresh(my_win);
                break;
             }
@@ -173,8 +176,11 @@ e_result move_snake(WINDOW *my_win, s_snake *snake, int arrow_key, int max_y, in
 
          status = game_over;
          // Prints GAME OVER in window
+         init_pair(3, COLOR_RED, COLOR_BLACK);
+         wattron(my_win, COLOR_PAIR(3));
          int size = strlen("GAME OVER...");
          mvwprintw(my_win, max_y/2, (max_x-size)/2, "GAME OVER..."); //
+         //wattroff(my_win, COLOR_PAIR(3));
          wrefresh(my_win);
          break;
       }
@@ -223,46 +229,46 @@ e_result generate_snake_food_coordinates(void)
    int upper_limit = (WIDTH * HEIGHT) - 1;
    e_result status = game_over;
 
-  while (1)
-  {
-     //Generate random number
-     srand(time(0));//Add time based seed
-     random_number = ( rand() % (upper_limit - lower_limit + 1) ) + lower_limit;//This is random number in range [0, WIDTH*HEIGHT]
+   while (1)
+   {
+      //Generate random number
+      srand(time(0));//Add time based seed
+      random_number = ( rand() % (upper_limit - lower_limit + 1) ) + lower_limit;//This is random number in range [0, WIDTH*HEIGHT]
 
-     /*
-      * Choosing next random coordinate from the window for the snake food
-      *
-      *              width = x ------>
-      *              --------------
-      *              |            |   ^
-      *              |            |   |
-      *              | Coordinate |   |
-      *              |   system   |   |
-      *              |            |   |
-      *              |            |height = y
-      *              --------------
-      *
-      */
-     current_food_coordinate_x = random_number % WIDTH;
-     current_food_coordinate_y = random_number / WIDTH;
+      /*
+       * Choosing next random coordinate from window for the snake food
+       *
+       *              width = x ------>
+       *              --------------
+       *              |            |   ^
+       *              |            |   |
+       *              | Coordinate |   |
+       *              |   system   |   |
+       *              |            |   |
+       *              |            |height = y
+       *              --------------
+       *
+       */
+      current_food_coordinate_x = random_number % WIDTH;
+      current_food_coordinate_y = random_number / WIDTH;
 
-     if (current_food_coordinate_x == 0 ||
-           current_food_coordinate_x == WIDTH-1 ||
-           current_food_coordinate_y == 0 ||
-           current_food_coordinate_y == HEIGHT-1 )
-     {
-        continue;
-     }
+      if (current_food_coordinate_x == 0 ||
+            current_food_coordinate_x == WIDTH-1 ||
+            current_food_coordinate_y == 0 ||
+            current_food_coordinate_y == HEIGHT-1 )
+      {
+         continue;
+      }
 
-     if (coordinate[current_food_coordinate_x][current_food_coordinate_y] == FREE)
-     {
-        coordinate[current_food_coordinate_x][current_food_coordinate_y] = OCCUPIED;
-        status = game_continue;
-        break;
-     }
-  }
+      if (coordinate[current_food_coordinate_x][current_food_coordinate_y] == FREE)
+      {
+         coordinate[current_food_coordinate_x][current_food_coordinate_y] = OCCUPIED;
+         status = game_continue;
+         break;
+      }
+   }
 
-  return status;
+   return status;
 }
 
 e_result update_food_status(WINDOW *my_win, s_snake *snake)
@@ -288,7 +294,15 @@ e_result update_food_status(WINDOW *my_win, s_snake *snake)
       else
       {
          //Snake has reached its max length - stop the game
-         //Nothing to be done
+         // Prints YOU WIN in window
+         status = game_over;
+         init_pair(4, COLOR_GREEN, COLOR_BLACK);
+         wattron(my_win, COLOR_PAIR(4));
+         int size = strlen("YOU WON...");
+         mvwprintw(my_win, max_y/2, (max_x-size)/2, "YOU WON..."); //
+         //wattroff(my_win, COLOR_PAIR(4));
+         wrefresh(my_win);
+         return status;
       }
    }
    else
@@ -314,13 +328,13 @@ int main(int argc, char *argv[])
    s_snake snake[MAX_SNAKE_BODY];
 
 #if 1//Snake co-ordinates
-//   int max_x = 0, max_y = 0;
+   //   int max_x = 0, max_y = 0;
    int next_x = 0, next_y = 0;
    int direction = 1;
 #endif//Snake co-ordinates
 
    initscr();        /* Start curses mode       */
-   //halfdelay(2);//CS
+
    /* Colour background */
    start_color();
    noecho();
@@ -338,6 +352,8 @@ int main(int argc, char *argv[])
 
    /* current window */
    getmaxyx(stdscr, main_max_y, main_max_x);
+//   init_pair(1, COLOR_BLUE, COLOR_BLACK);
+   attron(COLOR_PAIR(1));
    int size = strlen("SNAKE GAME");
    mvprintw(2, (main_max_x-size)/2, "SNAKE GAME");
    int size1 = strlen("Press SPACE for Pause & Resume");
@@ -346,11 +362,11 @@ int main(int argc, char *argv[])
    refresh();
 
    my_win = create_newwin(height, width, starty, startx);
-   init_pair(WIN_PAIR, COLOR_GREEN, COLOR_BLACK);
-   wattron(my_win, COLOR_PAIR(WIN_PAIR));
+   /*init_pair(1, COLOR_GREEN, COLOR_BLACK);
+   wattron(my_win, COLOR_PAIR(1));
    wrefresh(my_win);
-   wattroff(my_win, COLOR_PAIR(WIN_PAIR));
-   
+   wattroff(my_win, COLOR_PAIR(1));*/
+
    keypad(my_win, TRUE);      /* I need that nifty F1    */
    nodelay(my_win, TRUE);
 
@@ -369,25 +385,25 @@ int main(int argc, char *argv[])
       //while(1)
    {
 #if 1//Play pause
-   if (ch == ' ')
-   {
-      if (pause_count == 0)
+      if (ch == ' ')
       {
-         pause_count = 1;
+         if (pause_count == 0)
+         {
+            pause_count = 1;
+         }
+         else if (pause_count == 1)
+         {
+            pause_count = 0;
+         }
       }
-      else if (pause_count == 1)
+
+      //mvwprintw(stdscr, 15, 30, "ch:%c", ch);
+      //refresh();
+
+      if (pause_count == 1)
       {
-         pause_count = 0;
+         continue;
       }
-   }
-
-   //mvwprintw(stdscr, 15, 30, "ch:%c", ch);
-   //refresh();
-
-   if (pause_count == 1)
-   {
-      continue;
-   }
 #endif//Play pause
 
 #if 1//In case of no user input select old arrow key
@@ -406,13 +422,13 @@ int main(int argc, char *argv[])
 #endif//Stop 180 degree rotation in snake's direction
 
 #if 1//Stop unwanted keys detection
-   if (ch != KEY_LEFT &&
-         ch != KEY_RIGHT &&
-         ch != KEY_UP &&
-         ch != KEY_DOWN )
-   {
-      ch = ch_old;
-   }
+      if (ch != KEY_LEFT &&
+            ch != KEY_RIGHT &&
+            ch != KEY_UP &&
+            ch != KEY_DOWN )
+      {
+         ch = ch_old;
+      }
 #endif//Stop unwanted keys detection
 
 #if 1//Decide co-ordinates
@@ -449,12 +465,19 @@ int main(int argc, char *argv[])
          sleep(2);
          break;
       }
+
       status = update_food_status(my_win, snake);
+      if (status == game_over)
+      {
+         //you won the game, game over!
+         sleep(2);
+         break;
+      }
 
       /* Update Score */
-   int size2 = strlen("SCORE     ");
-   mvprintw(6, (main_max_x-size2)/2, "SCORE : %d", score);
-   refresh();
+      int size2 = strlen("SCORE     ");
+      mvprintw(6, (main_max_x-size2)/2, "SCORE : %d", score);
+      refresh();
 
       wrefresh(my_win);
 #endif//Move the snake
@@ -476,6 +499,8 @@ int main(int argc, char *argv[])
       }
 #endif//Decide direction based on arrow keys
 
+      //TODO - Snake touches itself, terminate!
+
       ch_old = ch;
       usleep(105000);//CS
       //sleep(5);//CS
@@ -483,7 +508,7 @@ int main(int argc, char *argv[])
       keypad(my_win, TRUE);      /* I need that nifty F1    */
       nodelay(my_win, TRUE);
    }
-
+   sleep(5);
    endwin();         /* End curses mode        */
    return 0;
 }
