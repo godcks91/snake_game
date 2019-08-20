@@ -11,3 +11,6 @@
 
 # Needs to install
 - ncurses library
+
+# Documentation
+- http://www.tldp.org/HOWTO/NCURSES-Programming-HOWTO/index.html
